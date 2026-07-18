@@ -14,17 +14,21 @@ hosts:
   # --- VLAN 10: Corporate LAN (workgroup, no AD) ---
   - name: ws-client1
     base_box:
-      image: windows-11-22h2-x64-enterprise
-      mgmt_user: windows
-      mgmt_protocol: winrm
+      #image: windows-11-22h2-x64-enterprise
+      #mgmt_user: windows
+      #mgmt_protocol: winrm
+      image: ubuntu-noble-x86_64
+      mgmt_user: ubuntu
     flavor: m1.medium
     #description: "Client workstation 1 - entry point with pre-staged credentials"
 
   - name: ws-client2
     base_box:
-      image: windows-11-22h2-x64-enterprise
-      mgmt_user: windows
-      mgmt_protocol: winrm
+      #image: windows-11-22h2-x64-enterprise
+      #mgmt_user: windows
+      #mgmt_protocol: winrm
+      image: ubuntu-noble-x86_64
+      mgmt_user: ubuntu
     flavor: m1.medium
     #description: "Client workstation 2 - has access to production servers"
 
@@ -69,15 +73,17 @@ hosts:
   # --- VLAN 99: SOC/SIEM (monitoring & attacker box) ---
   - name: siem-manager
     base_box:
-      image: debian-12-x64-server
+      image: debian-12-x86_64
       mgmt_user: debian
     flavor: m1.large
     #description: "Wazuh SIEM manager/indexer/dashboard"
 
   - name: attacker-box
     base_box:
-      image: kali-linux-current-amd64
-      mgmt_user: kali
+      #image: kali-linux-current-amd64
+      #mgmt_user: kali
+      image: ubuntu-noble-x86_64
+      mgmt_user: ubuntu
     flavor: m1.large
     #description: "Attacker workstation - red team tools"
 
@@ -87,7 +93,8 @@ hosts:
 routers:
   - name: core-router
     base_box:
-      image: debian-9-x86_64
+      #image: debian-9-x86_64
+      image: debian-12-x86_64
       mgmt_user: debian
     flavor: m1.small
     #description: "Multi-VLAN router with iptables-based zero-trust segmentation"
