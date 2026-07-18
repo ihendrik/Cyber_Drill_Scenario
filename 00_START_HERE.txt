@@ -1,0 +1,193 @@
+╔════════════════════════════════════════════════════════════════════════════╗
+║                                                                            ║
+║        RANSOMWARE CYBER DRILL 2026 — KYPO CRP DEPLOYMENT PACKAGE         ║
+║                                                                            ║
+║                          🚀 START HERE 🚀                                 ║
+║                                                                            ║
+╚════════════════════════════════════════════════════════════════════════════╝
+
+You have received a complete, production-ready deployment package for running 
+the Ransomware Cyber Drill 2026 (LockBit Black attack simulation) on KYPO 
+Cyber Range Platform.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📦 WHAT YOU HAVE (10 FILES):
+
+  1. ⭐ 00_START_HERE.txt              ← You are here
+  2. ⭐ MANIFEST.md                    ← Complete file inventory & guide
+  3. ⭐ QUICKSTART.md                  ← 5-minute overview of all files
+  4. 📋 Image_Preparation_Checklist.md ← What images to build
+  5. 🏗️  topology.yml                  ← KYPO infrastructure definition (ready to use)
+  6. 📦 provisioning.zip               ← Ansible playbook + all setup files
+  7. 🔧 setup-repo.sh                  ← Automated Git repo initialization
+  8. 📖 README_KYPO_DEPLOYMENT.md      ← KYPO portal step-by-step guide
+  9. 📚 TOPOLOGY_REFERENCE.md          ← Detailed topology.yml explanation
+  10. 📚 ARCHITECTURE_GUIDE.md          ← Full design rationale
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎯 DEPLOYMENT WORKFLOW (4 PHASES):
+
+  PHASE 1: IMAGE PREPARATION (2–8 hours)
+    → Read: Image_Preparation_Checklist.md
+    → Build/upload 5 OpenStack images (Rocky 9, Debian 12, Windows 11, 
+      Kali, Debian 9)
+
+  PHASE 2: REPOSITORY SETUP (10 minutes)
+    → Run: bash setup-repo.sh <your-git-repo-url>
+    → Or manually create Git repo with topology.yml + provisioning/
+
+  PHASE 3: KYPO DEPLOYMENT (30 min setup + 20 min provisioning)
+    → Read: README_KYPO_DEPLOYMENT.md (Steps 1–6)
+    → Register Git repo in KYPO portal
+    → Create Pool (Terraform builds 10 instances + 5 networks)
+    → Allocate Sandbox Unit and verify connectivity
+
+  PHASE 4: DRILL EXECUTION (2–3 hours)
+    → Read: README_KYPO_DEPLOYMENT.md (Pre-Drill Checklist + Running the Drill)
+    → Execute 4-phase attack: LLMNR → lateral movement → ransomware → detection
+    → Analyze Wazuh alerts in real-time
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📖 READING PATH (IN ORDER):
+
+  Step 1 (5 min):   MANIFEST.md
+                     → Overview of all 10 files + file index
+  
+  Step 2 (5 min):   QUICKSTART.md
+                     → What each file does + workflow diagram
+  
+  Step 3 (2–8 hr):  Image_Preparation_Checklist.md
+                     → Build/upload images to OpenStack
+  
+  Step 4 (30 min):  README_KYPO_DEPLOYMENT.md
+                     → KYPO portal walkthrough (create Definition → Pool → Sandbox)
+  
+  Step 5 (2–3 hr):  README_KYPO_DEPLOYMENT.md (§ "Running the Drill")
+                     → Execute the attack simulation
+  
+  Reference (as needed):
+    - TOPOLOGY_REFERENCE.md    → Deep dive into topology.yml
+    - ARCHITECTURE_GUIDE.md    → Design rationale & technical details
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ WHAT'S INCLUDED (READY TO USE):
+
+  ✓ Complete topology definition (topology.yml)
+    - 9 hosts (2 Windows, 5 Linux servers, 1 Wazuh SIEM, 1 Kali)
+    - 5 isolated VLANs (workstations, production, DR, backup, SOC/SIEM)
+    - 1 multi-homed router (inter-VLAN segmentation via iptables)
+    - All IPs & network mappings from the design scenario
+
+  ✓ Automated provisioning (provisioning.zip):
+    - Ansible playbook (6 plays, automated setup)
+    - Wazuh installation (manager + agents)
+    - Custom detection rules (6 ransomware indicators)
+    - File integrity monitoring (syscheck)
+    - Ransomware simulation script (non-destructive)
+    - Pre-staged credentials (for lateral movement demo)
+
+  ✓ Complete documentation (5 guides):
+    - Image preparation guide
+    - KYPO portal deployment walkthrough
+    - Drill execution timeline & troubleshooting
+    - Topology reference & architecture docs
+
+  ✓ Automated setup script (setup-repo.sh)
+    - One-command Git repo initialization
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⏱️  TIMING EXPECTATIONS:
+
+  One-Time Setup:          10–16 hours total
+    - Image preparation:   2–8 hours (build/upload 5 images)
+    - Repository setup:    10 minutes (automated)
+    - KYPO deployment:     30 min (portal) + 20 min (provisioning)
+    - Verification:        20 min (pre-drill checklist)
+
+  Subsequent Runs:         40 minutes
+    - Pool creation:       20 minutes (Terraform builds instances)
+    - Provisioning:        5 minutes (Ansible playbook)
+    - Verification:        15 minutes (pre-drill checklist)
+
+  Drill Execution:         2–3 hours
+    - Full attack chain:   1.5 hours (LLMNR → ransomware)
+    - Analysis & debrief:  0.5–1.5 hours
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🎓 SCENARIO OVERVIEW:
+
+  Attack Type:         Full ransomware chain (LockBit Black simulation)
+  
+  Attack Timeline:
+    T+0:00  → LLMNR spoofing / credential capture (Responder)
+    T+5:00  → Lateral movement (NTLM relay / RDP)
+    T+8:00  → Data exfiltration (FIM alerts)
+    T+10:00 → Ransomware deployment (simulation script)
+    T+10:15 → Security team detection (Wazuh alerts)
+    T+12:00 → Incident response (assess DR/backup for recovery)
+    T+15:00 → Recovery phase (restore from backup)
+
+  Detection Focus:
+    - LLMNR hash capture patterns
+    - Lateral movement via RDP
+    - Service stops (T1489)
+    - Mass file renames (T1486)
+    - Ransom note creation (T1491)
+    - Network segmentation effectiveness
+
+  Network:
+    - 5 isolated VLANs with zero-trust firewall rules
+    - DR replication for data loss assessment
+    - Isolated backup for recovery source
+    - Wazuh SIEM on separate VLAN for monitoring
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❓ QUICK ANSWERS:
+
+  Q: Do I need to modify any files?
+  A: No. Everything is ready to use as-is. Customization is optional.
+
+  Q: What if my OpenStack image names are different?
+  A: Update the image names in topology.yml to match your Glance catalog.
+
+  Q: What if I don't have the required OpenStack images?
+  A: Follow Image_Preparation_Checklist.md to build them (2–8 hours).
+
+  Q: Can I run multiple drills simultaneously?
+  A: Yes. Create multiple Pools or multiple Sandbox Allocation Units.
+
+  Q: How do I restore a sandbox after the ransomware attack?
+  A: Option 1: Allocate a fresh sandbox from the Pool.
+     Option 2: See README_KYPO_DEPLOYMENT.md §9 for OpenStack snapshots.
+
+  Q: What if something fails during deployment?
+  A: See README_KYPO_DEPLOYMENT.md § "Troubleshooting" for diagnosis steps.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+🚀 LET'S GET STARTED:
+
+  STEP 1: Open MANIFEST.md (complete file inventory & guide)
+  STEP 2: Open QUICKSTART.md (5-minute overview)
+  STEP 3: Open Image_Preparation_Checklist.md (start building images)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Questions? See:
+  • MANIFEST.md               → Complete file descriptions & navigation index
+  • QUICKSTART.md             → Overview of all files & workflow
+  • TOPOLOGY_REFERENCE.md     → Deep dive into topology.yml
+  • ARCHITECTURE_GUIDE.md     → Design rationale & technical details
+
+════════════════════════════════════════════════════════════════════════════════
+
+Generated: July 2026
+KYPO CRP Version: 1.4.0+
+Status: ✅ PRODUCTION READY

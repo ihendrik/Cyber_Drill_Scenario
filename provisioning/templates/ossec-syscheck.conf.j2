@@ -1,0 +1,31 @@
+<!-- Wazuh FIM Configuration for Ransomware Drill -->
+<!-- Rendered to /var/ossec/etc/ossec.conf.d/syscheck-drill.conf -->
+
+<syscheck>
+  <frequency>30</frequency>
+  <alert_new_files>yes</alert_new_files>
+  <report_changes>yes</report_changes>
+
+  <!-- Monitor production data directories -->
+  <directories check_all="yes" report_changes="yes" realtime="yes">
+    /opt/data1
+  </directories>
+
+  <directories check_all="yes" report_changes="yes" realtime="yes">
+    /opt/data2
+  </directories>
+
+  <!-- Monitor database directory -->
+  <directories check_all="yes" report_changes="yes" realtime="yes">
+    /var/lib/database
+  </directories>
+
+  <!-- Monitor user document directories on Windows -->
+  <directories check_all="yes" report_changes="yes" realtime="yes">
+    C:\Users\admin\Documents
+  </directories>
+
+  <directories check_all="yes" report_changes="yes" realtime="yes">
+    C:\Users\admin\Downloads
+  </directories>
+</syscheck>

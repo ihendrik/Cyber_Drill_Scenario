@@ -1,0 +1,67 @@
+<!-- Custom Wazuh Detection Rules for Ransomware Cyber Drill -->
+<!-- Deploy to /var/ossec/etc/rules/detection_rules.xml -->
+
+<group name="ransomware,drill,">
+
+  <!-- Detection 1: Mass file rename with ransomware extension -->
+  <rule id="100100" level="15">
+    <if_sid>554</if_sid>
+    <field name="file">\.encrypted$</field>
+    <description>Ransomware: Files with .encrypted extension detected (file encryption indicator)</description>
+    <mitre>
+      <id>T1486</id>
+    </mitre>
+  </rule>
+
+  <!-- Detection 2: Ransom note creation -->
+  <rule id="100101" level="15">
+    <if_sid>554</if_sid>
+    <field name="file">RANSOM_NOTE\.txt$</field>
+    <description>Ransomware: Ransom note file created - infection confirmed!</description>
+    <mitre>
+      <id>T1491</id>
+    </mitre>
+  </rule>
+
+  <!-- Detection 3: Multiple service stops in short timeframe -->
+  <rule id="100102" level="12">
+    <if_sid>5707</if_sid>
+    <frequency>5</frequency>
+    <timeframe>60</timeframe>
+    <description>Ransomware: Multiple services stopped in 60 seconds (T1489)</description>
+    <mitre>
+      <id>T1489</id>
+    </mitre>
+  </rule>
+
+  <!-- Detection 4: Credential dumping attempt -->
+  <rule id="100103" level="14">
+    <if_sid>61613</if_sid>
+    <description>Credential dumping detected - possible LSASS extraction (T1003.001)</description>
+    <mitre>
+      <id>T1003.001</id>
+    </mitre>
+  </rule>
+
+  <!-- Detection 5: Lateral movement via RDP -->
+  <rule id="100104" level="10">
+    <if_sid>60122</if_sid>
+    <field name="data.srcip">10\.20\.10\.11</field>
+    <description>RDP connection from client network - possible lateral movement (T1021.001)</description>
+    <mitre>
+      <id>T1021.001</id>
+    </mitre>
+  </rule>
+
+  <!-- Detection 6: Mass file access pattern (exfiltration) -->
+  <rule id="100105" level="12">
+    <if_sid>600</if_sid>
+    <frequency>20</frequency>
+    <timeframe>60</timeframe>
+    <description>Mass file access pattern - possible data exfiltration</description>
+    <mitre>
+      <id>T1020</id>
+    </mitre>
+  </rule>
+
+</group>

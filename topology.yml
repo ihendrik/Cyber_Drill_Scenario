@@ -1,0 +1,275 @@
+---
+# Ransomware Cyber Drill 2026 — KYPO CRP Topology Definition
+# Place this file as: ransomware-drill-2026/topology.yml in your Git repository
+# Images must be pre-uploaded to OpenStack Glance and match names exactly
+# Provisioning via: provisioning/playbook.yml (runs automatically after topology build)
+
+provider: OpenStack
+name: ransomware-drill-2026
+
+# =============================================================================
+# HOSTS (9 total: 2 Windows clients, 5 Linux servers, 1 Wazuh SIEM, 1 Kali)
+# =============================================================================
+hosts:
+  # --- VLAN 10: Corporate LAN (workgroup, no AD) ---
+  - name: ws-client1
+    base_box:
+      image: windows-11-22h2-x64-enterprise
+      mgmt_user: windows
+      mgmt_protocol: winrm
+    flavor: csirtmu.small2x4
+    description: "Client workstation 1 - entry point with pre-staged credentials"
+
+  - name: ws-client2
+    base_box:
+      image: windows-11-22h2-x64-enterprise
+      mgmt_user: windows
+      mgmt_protocol: winrm
+    flavor: csirtmu.small2x4
+    description: "Client workstation 2 - has access to production servers"
+
+  # --- VLAN 20: Production (primary encryption targets) ---
+  - name: prod-server1
+    base_box:
+      image: rocky-9-x64-server
+      mgmt_user: rocky
+    flavor: csirtmu.small2x4
+    description: "Production data server 1 - primary ransomware target"
+
+  - name: prod-server2
+    base_box:
+      image: rocky-9-x64-server
+      mgmt_user: rocky
+    flavor: csirtmu.small2x4
+    description: "Production data server 2 - primary ransomware target"
+
+  # --- VLAN 30: Disaster Recovery (replicated data) ---
+  - name: dr-server1
+    base_box:
+      image: rocky-9-x64-server
+      mgmt_user: rocky
+    flavor: csirtmu.tiny1x2
+    description: "DR replica server 1 - receives replication from production"
+
+  - name: dr-server2
+    base_box:
+      image: rocky-9-x64-server
+      mgmt_user: rocky
+    flavor: csirtmu.tiny1x2
+    description: "DR replica server 2 - receives replication from production"
+
+  # --- VLAN 40: Backup (isolated, clean backup copies) ---
+  - name: backup-server
+    base_box:
+      image: rocky-9-x64-server
+      mgmt_user: rocky
+    flavor: csirtmu.tiny1x2
+    description: "Backup server - isolated by network policy, recovery source"
+
+  # --- VLAN 99: SOC/SIEM (monitoring & attacker box) ---
+  - name: siem-manager
+    base_box:
+      image: debian-12-x64-server
+      mgmt_user: debian
+    flavor: csirtmu.medium4x8
+    description: "Wazuh SIEM manager/indexer/dashboard"
+
+  - name: attacker-box
+    base_box:
+      image: kali-linux-current-amd64
+      mgmt_user: kali
+    flavor: csirtmu.medium4x8
+    description: "Attacker workstation - red team tools"
+
+# =============================================================================
+# ROUTER (1 multi-homed router for inter-VLAN segmentation)
+# =============================================================================
+routers:
+  - name: core-router
+    base_box:
+      image: debian-9-x86_64
+      mgmt_user: debian
+    flavor: csirtmu.tiny1x2
+    description: "Multi-VLAN router with iptables-based zero-trust segmentation"
+
+# =============================================================================
+# NETWORKS (5 isolated VLANs)
+# =============================================================================
+networks:
+  # VLAN 10: Corporate LAN (workstations)
+  - name: net-clients
+    cidr: 10.20.10.0/24
+    accessible_by_user: True
+    description: "Corporate LAN - client workstations"
+
+  # VLAN 20: Production (primary servers, primary attack targets)
+  - name: net-production
+    cidr: 10.20.20.0/24
+    accessible_by_user: True
+    description: "Production network - primary ransomware targets"
+
+  # VLAN 30: Disaster Recovery (replication copies)
+  - name: net-dr
+    cidr: 10.20.30.0/24
+    accessible_by_user: True
+    description: "Disaster Recovery - replicated copies from production"
+
+  # VLAN 40: Backup (isolated backup copies)
+  - name: net-backup
+    cidr: 10.20.40.0/24
+    accessible_by_user: True
+    description: "Backup network - isolated backup, recovery source"
+
+  # VLAN 99: SOC/SIEM (monitoring and attacker box)
+  - name: net-siem
+    cidr: 10.20.99.0/24
+    accessible_by_user: True
+    description: "SOC/SIEM network - Wazuh manager and attacker workstation"
+
+# =============================================================================
+# NETWORK MAPPINGS (attach hosts to networks with specific IPs)
+# =============================================================================
+net_mappings:
+  # --- VLAN 10: Corporate LAN ---
+  - host: ws-client1
+    network: net-clients
+    ip: 10.20.10.11
+  - host: ws-client2
+    network: net-clients
+    ip: 10.20.10.12
+
+  # --- VLAN 20: Production ---
+  - host: prod-server1
+    network: net-production
+    ip: 10.20.20.21
+  - host: prod-server2
+    network: net-production
+    ip: 10.20.20.22
+
+  # --- VLAN 30: DR ---
+  - host: dr-server1
+    network: net-dr
+    ip: 10.20.30.31
+  - host: dr-server2
+    network: net-dr
+    ip: 10.20.30.32
+
+  # --- VLAN 40: Backup ---
+  - host: backup-server
+    network: net-backup
+    ip: 10.20.40.41
+
+  # --- VLAN 99: SIEM ---
+  - host: siem-manager
+    network: net-siem
+    ip: 10.20.99.99
+  - host: attacker-box
+    network: net-siem
+    ip: 10.20.99.10
+
+# =============================================================================
+# ROUTER MAPPINGS (attach router to all networks for inter-VLAN routing)
+# =============================================================================
+router_mappings:
+  - router: core-router
+    network: net-clients
+    ip: 10.20.10.1
+  - router: core-router
+    network: net-production
+    ip: 10.20.20.1
+  - router: core-router
+    network: net-dr
+    ip: 10.20.30.1
+  - router: core-router
+    network: net-backup
+    ip: 10.20.40.1
+  - router: core-router
+    network: net-siem
+    ip: 10.20.99.1
+
+# =============================================================================
+# GROUPS (for Ansible provisioning target selection in playbook.yml)
+# =============================================================================
+groups:
+  # Windows hosts: Wazuh agent + SMB-signing disable + credential pre-stage
+  - name: windows-clients
+    nodes:
+      - ws-client1
+      - ws-client2
+    description: "Windows clients - targets for Wazuh agent installation"
+
+  # Linux servers: Wazuh agent installation
+  - name: linux-servers
+    nodes:
+      - prod-server1
+      - prod-server2
+      - dr-server1
+      - dr-server2
+      - backup-server
+    description: "Linux production/DR/backup servers - Wazuh agent targets"
+
+  # Wazuh SIEM: manager/indexer/dashboard installation
+  - name: siem-server
+    nodes:
+      - siem-manager
+    description: "Wazuh all-in-one manager/indexer/dashboard host"
+
+  # Attacker box: red-team tooling baseline
+  - name: attacker
+    nodes:
+      - attacker-box
+    description: "Attacker workstation - red-team tools"
+
+  # Router: inter-VLAN segmentation via iptables
+  - name: core-router
+    nodes:
+      - core-router
+    description: "Multi-homed router - implements zero-trust inter-VLAN policies"
+
+# =============================================================================
+# SCENARIO NARRATIVE
+# =============================================================================
+# Attack flow (ransomware simulation):
+#
+# 1. Initial Access (LLMNR/Responder):
+#    - Attacker (attacker-box on VLAN 99) spoofs LLMNR replies
+#    - Harvests NTLMv2 hash from failed SMB authentication attempts
+#
+# 2. Credential Reuse Lateral Movement:
+#    - Attacker uses captured/pre-staged credential to reach production servers
+#    - SMB-signing is disabled on workstations
+#    - NTLM relay attacks on production servers via RDP
+#
+# 3. Data Exfiltration:
+#    - Copies critical data from production
+#    - Wazuh FIM (syscheck) detects large file reads/copies
+#
+# 4. Ransomware Deployment:
+#    - Executes simulation script on production targets
+#    - Renames files with extension marker
+#    - Stops services (T1489)
+#    - Drops ransom notes (T1491)
+#
+# 5. Detection & Response:
+#    - Wazuh dashboard shows alerts as events occur in real-time
+#    - Security team correlates FIM, service stop, and ransom note detections
+#    - DR replicas show which data was encrypted on production
+#    - Backup server remains clean, isolated by network policy
+#
+# Network Segmentation (enforced by core-router iptables rules):
+#   - Rule 1: ws-client2 → production [ALLOW] - business need
+#   - Rule 2: Production replication → DR [ALLOW]
+#   - Rule 3: Production backup → backup, tcp 22/873 only [ALLOW]
+#   - Rule 4: All agents → SIEM (1514/1515/55000) [ALLOW]
+#   - Rule 5: Production → Clients [REJECT] - anti-boomerang
+#   - Default: DROP all other inter-VLAN traffic (zero-trust)
+#
+# Drill Timeline:
+#   T+0:00   - Red team starts attack simulation
+#   T+2:00   - LLMNR spoofing, hash capture
+#   T+5:00   - Lateral movement to production
+#   T+8:00   - Data exfiltration (Wazuh FIM alerts)
+#   T+10:00  - Ransomware deployed (services stopped)
+#   T+10:15  - Security team identifies alerts
+#   T+12:00  - Incident response: assess DR/backup for recovery
+#   T+15:00  - Mock restore from backup (recovery phase)

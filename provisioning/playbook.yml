@@ -1,0 +1,185 @@
+---
+# Ransomware Cyber Drill 2026 — KYPO CRP Sandbox Provisioning
+# Runs automatically after the Topology Instance is built
+# Groups are defined in ../topology.yml
+
+# 1. Core router: implement zero-trust inter-VLAN segmentation
+- hosts: core-router
+  become: true
+  tasks:
+    - name: Enable IP forwarding
+      ansible.posix.sysctl:
+        name: net.ipv4.ip_forward
+        value: "1"
+        state: present
+        reload: true
+
+    - name: Flush existing FORWARD rules
+      ansible.builtin.command: iptables -F FORWARD
+
+    - name: Default-allow established/related return traffic
+      ansible.builtin.command: >
+        iptables -A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+    - name: "Rule 1: Client 2 → Production, all ports"
+      ansible.builtin.command: >
+        iptables -A FORWARD -s 10.20.10.12/32 -d 10.20.20.0/24 -j ACCEPT
+
+    - name: "Rule 2: Production replication → DR, all ports"
+      ansible.builtin.command: >
+        iptables -A FORWARD -s 10.20.20.0/24 -d 10.20.30.0/24 -j ACCEPT
+
+    - name: "Rule 3: Production backup → Backup, tcp 22/873 only"
+      ansible.builtin.command: >
+        iptables -A FORWARD -s 10.20.20.21/32 -d 10.20.40.41/32
+        -p tcp -m multiport --dports 22,873 -j ACCEPT
+
+    - name: "Rule 4: All agents → SIEM, tcp 1514/1515/55000"
+      ansible.builtin.command: >
+        iptables -A FORWARD -d 10.20.99.99/32 -p tcp
+        -m multiport --dports 1514,1515,55000 -j ACCEPT
+
+    - name: "Rule 5: Syslog → SIEM, udp 1514"
+      ansible.builtin.command: >
+        iptables -A FORWARD -d 10.20.99.99/32 -p udp --dport 1514 -j ACCEPT
+
+    - name: "Rule 6: Block Production → Clients (anti-boomerang)"
+      ansible.builtin.command: >
+        iptables -A FORWARD -s 10.20.20.0/24 -d 10.20.10.0/24 -j REJECT
+
+    - name: Default-deny everything else between VLANs
+      ansible.builtin.command: iptables -P FORWARD DROP
+
+    - name: Ensure iptables-persistent is installed
+      ansible.builtin.apt:
+        name: iptables-persistent
+        state: present
+        update_cache: true
+
+    - name: Persist firewall rules
+      ansible.builtin.shell: iptables-save > /etc/iptables/rules.v4
+
+# 2. Wazuh SIEM: manager/indexer/dashboard (all-in-one)
+- hosts: siem-server
+  become: true
+  tasks:
+    - name: Download Wazuh install script
+      ansible.builtin.get_url:
+        url: https://packages.wazuh.com/4.x/wazuh-install.sh
+        dest: /tmp/wazuh-install.sh
+        mode: "0755"
+
+    - name: Run Wazuh all-in-one installer
+      ansible.builtin.command: /tmp/wazuh-install.sh -a -i
+      args:
+        creates: /var/ossec/bin/wazuh-control
+
+    - name: Ensure syscheck config directory exists
+      ansible.builtin.file:
+        path: /var/ossec/etc/ossec.conf.d
+        state: directory
+        mode: "0750"
+
+    - name: Push FIM (syscheck) configuration
+      ansible.builtin.template:
+        src: templates/ossec-syscheck.conf.j2
+        dest: /var/ossec/etc/ossec.conf.d/syscheck-drill.conf
+      notify: restart wazuh-manager
+
+    - name: Push custom detection rules
+      ansible.builtin.copy:
+        src: files/detection_rules.xml
+        dest: /var/ossec/etc/rules/detection_rules.xml
+      notify: restart wazuh-manager
+  handlers:
+    - name: restart wazuh-manager
+      ansible.builtin.systemd:
+        name: wazuh-manager
+        state: restarted
+
+# 3. Linux servers: Wazuh agent installation
+- hosts: linux-servers
+  become: true
+  tasks:
+    - name: Download Wazuh agent RPM
+      ansible.builtin.get_url:
+        url: https://packages.wazuh.com/4.x/yum/wazuh-agent-4.x.x-1.x86_64.rpm
+        dest: /tmp/wazuh-agent.rpm
+
+    - name: Install Wazuh agent
+      ansible.builtin.command: rpm -ihv /tmp/wazuh-agent.rpm
+      environment:
+        WAZUH_MANAGER: "10.20.99.99"
+        WAZUH_AGENT_NAME: "{{ inventory_hostname | upper }}"
+      args:
+        creates: /var/ossec/bin/wazuh-control
+
+    - name: Enable and start Wazuh agent
+      ansible.builtin.systemd:
+        name: wazuh-agent
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    - name: Create data directories for monitoring
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: "0755"
+      loop:
+        - /opt/data1
+        - /opt/data2
+        - /var/lib/database
+        - /home/admin/documents
+
+# 4. Windows workstations: Wazuh agent + credential pre-stage
+- hosts: windows-clients
+  tasks:
+    - name: Install Wazuh Windows agent
+      ansible.windows.win_package:
+        path: https://packages.wazuh.com/4.x/windows/wazuh-agent-4.x.x-1.msi
+        arguments: >
+          /q WAZUH_MANAGER="10.20.99.99"
+          WAZUH_AGENT_NAME="{{ inventory_hostname | upper }}"
+          WAZUH_REGISTRATION_SERVER="10.20.99.99"
+        state: present
+
+    - name: Start Wazuh agent service
+      ansible.windows.win_service:
+        name: WazuhSvc
+        state: started
+        start_mode: auto
+
+    - name: Disable SMB signing for drill scenario
+      ansible.windows.win_regedit:
+        path: HKLM:\SYSTEM\CurrentControlSet\Services\LanmanWorkstation\Parameters
+        name: RequireSecuritySignature
+        data: 0
+        type: dword
+
+# 5. Pre-stage credentials on first client
+- hosts: ws-client1
+  tasks:
+    - name: Create credentials staging directory
+      ansible.windows.win_file:
+        path: C:\Users\admin\AppData\Roaming\Staging
+        state: directory
+
+    - name: Drop pre-staged credentials file
+      ansible.windows.win_copy:
+        src: files/credentials.txt
+        dest: C:\Users\admin\AppData\Roaming\Staging\credentials.txt
+
+# 6. Attacker box: red-team tooling
+- hosts: attacker
+  become: true
+  tasks:
+    - name: Install red-team tools
+      ansible.builtin.apt:
+        name:
+          - responder
+          - impacket-scripts
+          - hashcat
+          - seclists
+        state: present
+        update_cache: true
