@@ -17,7 +17,7 @@ hosts:
       image: windows-11-22h2-x64-enterprise
       mgmt_user: windows
       mgmt_protocol: winrm
-    flavor: csirtmu.small2x4
+    flavor: m1.medium
     #description: "Client workstation 1 - entry point with pre-staged credentials"
 
   - name: ws-client2
@@ -25,7 +25,7 @@ hosts:
       image: windows-11-22h2-x64-enterprise
       mgmt_user: windows
       mgmt_protocol: winrm
-    flavor: csirtmu.small2x4
+    flavor: m1.medium
     #description: "Client workstation 2 - has access to production servers"
 
   # --- VLAN 20: Production (primary encryption targets) ---
@@ -33,14 +33,14 @@ hosts:
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
-    flavor: csirtmu.small2x4
+    flavor: m1.medium
     #description: "Production data server 1 - primary ransomware target"
 
   - name: prod-server2
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
-    flavor: csirtmu.small2x4
+    flavor: m1.medium
     #description: "Production data server 2 - primary ransomware target"
 
   # --- VLAN 30: Disaster Recovery (replicated data) ---
@@ -48,14 +48,14 @@ hosts:
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
-    flavor: csirtmu.tiny1x2
+    flavor: m1.small
     #description: "DR replica server 1 - receives replication from production"
 
   - name: dr-server2
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
-    flavor: csirtmu.tiny1x2
+    flavor: m1.small
     #description: "DR replica server 2 - receives replication from production"
 
   # --- VLAN 40: Backup (isolated, clean backup copies) ---
@@ -63,7 +63,7 @@ hosts:
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
-    flavor: csirtmu.tiny1x2
+    flavor: m1.small
     #description: "Backup server - isolated by network policy, recovery source"
 
   # --- VLAN 99: SOC/SIEM (monitoring & attacker box) ---
@@ -71,14 +71,14 @@ hosts:
     base_box:
       image: debian-12-x64-server
       mgmt_user: debian
-    flavor: csirtmu.medium4x8
+    flavor: m1.large
     #description: "Wazuh SIEM manager/indexer/dashboard"
 
   - name: attacker-box
     base_box:
       image: kali-linux-current-amd64
       mgmt_user: kali
-    flavor: csirtmu.medium4x8
+    flavor: m1.large
     #description: "Attacker workstation - red team tools"
 
 # =============================================================================
@@ -89,7 +89,7 @@ routers:
     base_box:
       image: debian-9-x86_64
       mgmt_user: debian
-    flavor: csirtmu.tiny1x2
+    flavor: m1.small
     #description: "Multi-VLAN router with iptables-based zero-trust segmentation"
 
 # =============================================================================
