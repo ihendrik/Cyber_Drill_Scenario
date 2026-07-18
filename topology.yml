@@ -196,7 +196,7 @@ groups:
     nodes:
       - ws-client1
       - ws-client2
-    description: "Windows clients - targets for Wazuh agent installation"
+    #description: "Windows clients - targets for Wazuh agent installation"
 
   # Linux servers: Wazuh agent installation
   - name: linux-servers
@@ -206,25 +206,25 @@ groups:
       - dr-server1
       - dr-server2
       - backup-server
-    description: "Linux production/DR/backup servers - Wazuh agent targets"
+    #description: "Linux production/DR/backup servers - Wazuh agent targets"
 
   # Wazuh SIEM: manager/indexer/dashboard installation
   - name: siem-server
     nodes:
       - siem-manager
-    description: "Wazuh all-in-one manager/indexer/dashboard host"
+    #description: "Wazuh all-in-one manager/indexer/dashboard host"
 
   # Attacker box: red-team tooling baseline
   - name: attacker
     nodes:
       - attacker-box
-    description: "Attacker workstation - red-team tools"
+    #description: "Attacker workstation - red-team tools"
 
   # Router: inter-VLAN segmentation via iptables
   - name: core-router
     nodes:
       - core-router
-    description: "Multi-homed router - implements zero-trust inter-VLAN policies"
+    #description: "Multi-homed router - implements zero-trust inter-VLAN policies"
 
 # =============================================================================
 # SCENARIO NARRATIVE
