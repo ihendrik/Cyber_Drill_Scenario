@@ -118,7 +118,7 @@ networks:
   - name: net-backup
     cidr: 10.20.40.0/24
     accessible_by_user: True
-    description: "Backup network - isolated backup, recovery source"
+    #description: "Backup network - isolated backup, recovery source"
 
   # VLAN 99: SOC/SIEM (monitoring and attacker box)
   - name: net-siem
