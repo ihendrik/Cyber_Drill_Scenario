@@ -4,7 +4,7 @@
 # Images must be pre-uploaded to OpenStack Glance and match names exactly
 # Provisioning via: provisioning/playbook.yml (runs automatically after topology build)
 
-provider: OpenStack
+#provider: OpenStack
 name: ransomware-drill-2026
 
 # =============================================================================
