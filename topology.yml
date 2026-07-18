@@ -13,7 +13,7 @@ name: ransomware-drill-2026
 hosts:
   # --- VLAN 10: Corporate LAN (workgroup, no AD) ---
   - name: ws-client1
-    os: linux
+    #os: linux
     base_box:
       #image: windows-11-22h2-x64-enterprise
       #mgmt_user: windows
@@ -24,7 +24,7 @@ hosts:
     #description: "Client workstation 1 - entry point with pre-staged credentials"
 
   - name: ws-client2
-    os: linux
+    #os: linux
     base_box:
       #image: windows-11-22h2-x64-enterprise
       #mgmt_user: windows
@@ -36,7 +36,7 @@ hosts:
 
   # --- VLAN 20: Production (primary encryption targets) ---
   - name: prod-server1
-    os: linux
+    #os: linux
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
@@ -44,7 +44,7 @@ hosts:
     #description: "Production data server 1 - primary ransomware target"
 
   - name: prod-server2
-    os: linux
+   # os: linux
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
@@ -53,7 +53,7 @@ hosts:
 
   # --- VLAN 30: Disaster Recovery (replicated data) ---
   - name: dr-server1
-    os: linux
+   # os: linux
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
@@ -61,7 +61,7 @@ hosts:
     #description: "DR replica server 1 - receives replication from production"
 
   - name: dr-server2
-    os: linux
+   # os: linux
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
@@ -70,7 +70,7 @@ hosts:
 
   # --- VLAN 40: Backup (isolated, clean backup copies) ---
   - name: backup-server
-    os: linux
+   # os: linux
     base_box:
       image: rocky-9-x64-server
       mgmt_user: rocky
@@ -79,7 +79,7 @@ hosts:
 
   # --- VLAN 99: SOC/SIEM (monitoring & attacker box) ---
   - name: siem-manager
-    os: linux
+   # os: linux
     base_box:
       image: debian-12-x86_64
       mgmt_user: debian
@@ -87,7 +87,7 @@ hosts:
     #description: "Wazuh SIEM manager/indexer/dashboard"
 
   - name: attacker-box
-    os: linux
+   # os: linux
     base_box:
       #image: kali-linux-current-amd64
       #mgmt_user: kali
@@ -101,7 +101,7 @@ hosts:
 # =============================================================================
 routers:
   - name: core-router
-    os: linux
+   # os: linux
     base_box:
       #image: debian-9-x86_64
       image: debian-12-x86_64
