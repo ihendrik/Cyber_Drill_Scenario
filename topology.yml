@@ -69,7 +69,7 @@ hosts:
     #description: "DR replica server 2 - receives replication from production"
 
   # --- VLAN 40: Backup (isolated, clean backup copies) ---
-  - name: backup-server.
+  - name: backup-server
     os: linux
     base_box:
       image: rocky-9-x64-server
@@ -101,6 +101,7 @@ hosts:
 # =============================================================================
 routers:
   - name: core-router
+    os: linux
     base_box:
       #image: debian-9-x86_64
       image: debian-12-x86_64
